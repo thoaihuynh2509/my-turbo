@@ -1,0 +1,19 @@
+{
+  "name": "@repo/utils",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "eslint": "^9.34.0",
+    "typescript": "5.9.2"
+  },
+  "exports": {
+    "./*": "./src/*.ts"
+  }
+}
