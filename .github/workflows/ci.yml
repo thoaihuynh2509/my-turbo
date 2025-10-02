@@ -22,19 +22,29 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: ⎔ Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm" # ← Quan trọng: cache pnpm
-
-      - name: 📦 Setup pnpm
+      - name: 📦 Setup pnpm FIRST
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: ⎔ Setup Node.js (AFTER pnpm)
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm" # Đúng syntax
+
+      - name: 🔍 Verify pnpm installation
+        run: |
+          echo "PNPM version:"
+          pnpm --version
+          echo "Node version:"
+          node --version
+          echo "NPM version:"
+          npm --version
 
       - name: 📦 Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build all packages
         run: pnpm build
