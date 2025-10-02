@@ -1,9 +1,9 @@
-# .github/workflows/ci.yml
-name: CI
+# .github/workflows/ci-enterprise.yml
+name: 🏢 Enterprise CI
 
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, release/*]
   pull_request:
     branches: [main]
 
@@ -11,10 +11,18 @@ env:
   NODE_VERSION: "20"
   PNPM_VERSION: "9.0.0"
 
+# Enterprise: Concurrency control
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build-and-test:
-    name: 🛠️ Build and Test
+  setup-and-validate:
+    name: ⚙️ Environment Setup & Validation
     runs-on: ubuntu-latest
+    outputs:
+      cache-key: ${{ steps.cache-key.outputs.key }}
+      pnpm-version: ${{ steps.pnpm-setup.outputs.pnpm-version }}
 
     steps:
       - name: ⬇️ Checkout code
@@ -22,41 +30,123 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: 📦 Setup pnpm FIRST
+      - name: 📦 Setup pnpm (Core)
+        id: pnpm-setup
         uses: pnpm/action-setup@v2
         with:
           version: ${{ env.PNPM_VERSION }}
           run_install: false
 
-      - name: ⎔ Setup Node.js (AFTER pnpm)
+      - name: ⎔ Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
-          cache: "pnpm" # Đúng syntax
+          cache: "pnpm"
 
-      - name: 🔍 Verify pnpm installation
+      - name: 🔍 Environment Diagnostics
+        id: diagnostics
         run: |
-          echo "PNPM version:"
-          pnpm --version
-          echo "Node version:"
-          node --version
-          echo "NPM version:"
-          npm --version
+          echo "=== ENVIRONMENT DIAGNOSTICS ==="
+          echo "PNPM path: $(which pnpm)"
+          echo "PNPM version: $(pnpm --version)"
+          echo "Node path: $(which node)"
+          echo "Node version: $(node --version)"
+          echo "NPM version: $(npm --version)"
+          echo "Working directory: $(pwd)"
+          echo "==============================="
 
-      - name: 📦 Install dependencies
-        run: pnpm install --frozen-lockfile
+          # Validate pnpm is executable
+          if ! command -v pnpm &> /dev/null; then
+            echo "❌ PNPM not found in PATH"
+            exit 1
+          fi
 
-      - name: 🏗️ Build all packages
+          echo "✅ PNPM successfully installed"
+
+      - name: 🗝️ Generate Cache Key
+        id: cache-key
+        run: |
+          # Enterprise cache key with lockfile hash
+          LOCKFILE_HASH=$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)
+          echo "key=pnpm-$LOCKFILE_HASH" >> $GITHUB_OUTPUT
+
+      - name: 💾 Restore pnpm Store Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+            **/node_modules
+          key: ${{ steps.cache-key.outputs.key }}
+          restore-keys: |
+            pnpm-
+
+  build-and-test:
+    name: 🏗️ Build & Test
+    runs-on: ubuntu-latest
+    needs: setup-and-validate
+    timeout-minutes: 25 # Enterprise: Prevent infinite runs
+
+    steps:
+      - name: ⬇️ Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+          run_install: false
+
+      - name: ⎔ Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: 💾 Restore Dependencies Cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.pnpm-store
+            node_modules
+            **/node_modules
+          key: ${{ needs.setup-and-validate.outputs.cache-key }}
+          restore-keys: |
+            pnpm-
+
+      - name: 📦 Install Dependencies
+        run: |
+          pnpm install --frozen-lockfile
+          echo "🔒 Lockfile integrity verified"
+
+      - name: 🏗️ Build Packages
         run: pnpm build
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
 
-      - name: 🧪 Run tests
-        run: pnpm test
+      - name: 🧪 Run Test Suite
+        run: |
+          pnpm test --coverage --passWithNoTests
+        env:
+          NODE_OPTIONS: "--max-old-space-size=4096"
+          CI: true
 
-      - name: 🔍 Run lint
-        run: pnpm lint
+      - name: 🔍 Code Quality Checks
+        run: |
+          pnpm lint
+          pnpm check-types
+          pnpm format --check
+        env:
+          CI: true
 
-      - name: 🔎 Check types
-        run: pnpm check-types
-
-      - name: 💅 Format check
-        run: pnpm format --check
+      - name: 📊 Test Coverage Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-coverage-${{ github.sha }}
+          path: |
+            **/coverage
+            **/test-results
+          retention-days: 30

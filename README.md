@@ -1,135 +1,79 @@
-# Turborepo starter
+Epic 1. Setup Monorepo (Turborepo)
 
-This Turborepo starter is maintained by the Turborepo core team.
+Task 1. Init monorepo bằng create-turbo@latest.
 
-## Using this example
+Task 2. Tạo 2 apps:
 
-Run the following command:
+web (Next.js, user-facing).
 
-```sh
-npx create-turbo@latest
-```
+admin (Next.js, dashboard).
 
-## What's inside?
+Task 3. Tạo 3 packages:
 
-This Turborepo includes the following packages/apps:
+ui (shared UI components).
 
-### Apps and Packages
+utils (date, format, validations).
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+api (API client, axios instance).
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+Task 4. Setup build pipeline (tsup hoặc rollup) cho packages.
 
-### Utilities
+Epic 2. Package Boundaries
 
-This Turborepo has some additional tools already setup for you:
+Task 1. Quy ước cấu trúc repo:
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+apps/
+web/
+admin/
+packages/
+ui/
+utils/
+api/
 
-### Build
+Task 2. Định nghĩa rule:
 
-To build all apps and packages, run the following command:
+apps → được phép dùng ui, utils, api.
 
-```
-cd my-turborepo
+packages → chỉ được import package trong packages, không import apps.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+Task 3. Viết eslint rule (eslint-plugin-boundaries hoặc import/no-restricted-paths) để enforce.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+Task 4. Tạo index.ts làm public API cho từng package.
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Epic 3. Versioning Strategy
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+Task 1. Setup Changesets để quản lý version.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+Task 2. Áp dụng unified versioning (tất cả packages share 1 version).
 
-### Develop
+Task 3. Switch sang independent versioning (mỗi package có version riêng).
 
-To develop all apps and packages, run the following command:
+Task 4. Thử release 1 package (utils) mà không ảnh hưởng package khác.
 
-```
-cd my-turborepo
+Epic 4. CI/CD & Caching
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
+Task 1. Setup GitHub Actions để chạy build + test cho tất cả apps/packages.
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
+Task 2. Bật Turborepo remote caching (Vercel hoặc custom S3).
 
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+Task 3. Demo incremental build (chỉ build package thay đổi).
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
+Epic 5. Documentation
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
+Task 1. Viết RFC ngắn: mô tả boundaries, versioning, rule enforce.
 
-### Remote Caching
+Task 2. Tạo diagram dependency graph (có thể dùng madge để visualize).
 
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
+Task 3. Ghi lại ưu/nhược điểm của Turborepo so với Nx.
 
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
+👉 Sau khi hoàn thành, bạn sẽ có:
 
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
+Một repo monorepo chuẩn enterprise với Turborepo.
 
-```
-cd my-turborepo
+Eslint enforce boundaries.
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
+Versioning strategy (unified + independent).
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
+CI/CD caching demo.
 
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+RFC doc để thể hiện tư duy system design.
