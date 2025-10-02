@@ -11,7 +11,6 @@ env:
   NODE_VERSION: "20"
   PNPM_VERSION: "9.0.0"
 
-# Enterprise: Concurrency control
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -49,43 +48,22 @@ jobs:
           echo "=== ENVIRONMENT DIAGNOSTICS ==="
           echo "PNPM path: $(which pnpm)"
           echo "PNPM version: $(pnpm --version)"
-          echo "Node path: $(which node)"
           echo "Node version: $(node --version)"
-          echo "NPM version: $(npm --version)"
           echo "Working directory: $(pwd)"
           echo "==============================="
-
-          # Validate pnpm is executable
-          if ! command -v pnpm &> /dev/null; then
-            echo "❌ PNPM not found in PATH"
-            exit 1
-          fi
-
-          echo "✅ PNPM successfully installed"
 
       - name: 🗝️ Generate Cache Key
         id: cache-key
         run: |
           # Enterprise cache key with lockfile hash
           LOCKFILE_HASH=$(sha256sum pnpm-lock.yaml | cut -d' ' -f1)
-          echo "key=pnpm-$LOCKFILE_HASH" >> $GITHUB_OUTPUT
-
-      - name: 💾 Restore pnpm Store Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            **/node_modules
-          key: ${{ steps.cache-key.outputs.key }}
-          restore-keys: |
-            pnpm-
+          echo "key=pnpm-${{ env.PNPM_VERSION }}-$LOCKFILE_HASH" >> $GITHUB_OUTPUT
 
   build-and-test:
     name: 🏗️ Build & Test
     runs-on: ubuntu-latest
     needs: setup-and-validate
-    timeout-minutes: 25 # Enterprise: Prevent infinite runs
+    timeout-minutes: 25
 
     steps:
       - name: ⬇️ Checkout code
@@ -104,17 +82,6 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: "pnpm"
-
-      - name: 💾 Restore Dependencies Cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.pnpm-store
-            node_modules
-            **/node_modules
-          key: ${{ needs.setup-and-validate.outputs.cache-key }}
-          restore-keys: |
-            pnpm-
 
       - name: 📦 Install Dependencies
         run: |
