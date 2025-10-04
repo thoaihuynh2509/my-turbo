@@ -66,13 +66,4 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: 🏗️ Build
-        run: pnpm build
-
-      - name: 🧪 Test
-        run: pnpm test --coverage --passWithNoTests
-
-      - name: 📊 Upload Coverage
-        uses: actions/upload-artifact@v4
-        with:
-          name: coverage-report
-          path: coverage/
+        run: pnpm run "ci:version
