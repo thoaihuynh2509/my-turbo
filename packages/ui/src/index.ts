@@ -1,3 +1,3 @@
 export { Code } from "./code";
-export { Button } from "./button";
+export * from "./Button";
 export { Card } from "./card";
