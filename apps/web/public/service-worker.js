@@ -72,7 +72,7 @@ self.addEventListener('fetch', (e) => {
 
           return response;
         })
-        .catch((error) => {
+        .catch(() => {
           console.log('[sw] fetch failed, offline fallback:', e.request.url);
 
           // Nếu là navigation request và offline, trả về offline.html

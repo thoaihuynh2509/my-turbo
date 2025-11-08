@@ -1,11 +1,19 @@
-import { colors, spacing, borderRadius, fontFamily, fontSize, fontWeight, breakpoints } from './tokens';
+import {
+  colors,
+  spacing,
+  borderRadius,
+  fontFamily,
+  fontSize,
+  fontWeight,
+  breakpoints,
+} from "./tokens";
 
 // Tailwind config từ design tokens
 export const tailwindConfig = {
   content: [
-    './src/**/*.{js,ts,jsx,tsx}',
-    '../../../packages/react-components/src/**/*.{js,ts,jsx,tsx}',
-    '../../../apps/**/*.{js,ts,jsx,tsx}',
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "../../../packages/react-components/src/**/*.{js,ts,jsx,tsx}",
+    "../../../apps/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
     extend: {

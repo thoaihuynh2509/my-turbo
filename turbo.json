@@ -14,14 +14,16 @@
       "outputs": []
     },
     "lint": {
-      "dependsOn": ["^lint"]
+      "dependsOn": ["^lint"],
+      "env": ["NODE_ENV"]
     },
     "check-types": {
       "dependsOn": ["^check-types"]
     },
     "dev": {
       "dependsOn": ["^build"],
-      "cache": false
+      "cache": false,
+      "env": ["NODE_ENV"]
     },
     "storybook:build": {
       "dependsOn": ["^build"],
@@ -31,5 +33,6 @@
       "cache": false
     }
 
-  }
+  },
+  "globalEnv": ["NODE_ENV"]
 }

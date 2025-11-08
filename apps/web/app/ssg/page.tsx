@@ -1,10 +1,10 @@
-export const dynamic = 'force-static' // static generation at build time
-export const revalidate = 60
+export const dynamic = "force-static"; // static generation at build time
+export const revalidate = 60;
 
 export default async function SSGPage() {
-  const data = await fetch('https://api.github.com/repos/vercel/next.js', {
+  const data = await fetch("https://api.github.com/repos/vercel/next.js", {
     next: { revalidate: 300 }, // cache 5 phút
-  }).then(res => res.json())
+  }).then((res) => res.json());
 
   return (
     <div className="p-6">
@@ -12,5 +12,5 @@ export default async function SSGPage() {
       <p>Stars: {data.stargazers_count}</p>
       <p>Last updated: {new Date().toLocaleString()}</p>
     </div>
-  )
+  );
 }
