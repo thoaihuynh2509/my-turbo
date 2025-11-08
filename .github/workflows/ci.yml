@@ -24,17 +24,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
 
       - name: 📦 Install
-        run: npm install
+        run: pnpm install
 
       - name: 🔍 Lint & Format
         run: |
-          npm run lint
-          npm run format --check
+          pnpm run lint
+          pnpm run format --check
 
       - name: 🔎 Type Check
-        run: npm run check-types
+        run: pnpm run check-types
 
   build:
     name: 🏗️ Build
@@ -49,9 +55,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+          cache: "pnpm"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 9.x
 
       - name: 📦 Install
-        run: npm install
+        run: pnpm install
 
       - name: 🏗️ Build
-        run: npm run ci:version
+        run: pnpm run ci:version
