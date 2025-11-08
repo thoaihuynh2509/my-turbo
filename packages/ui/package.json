@@ -9,10 +9,7 @@
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
     },
-    "./tailwind": {
-      "types": "./dist/tailwind.d.ts",
-      "import": "./dist/tailwind.js"
-    }
+    "./styles.css": "./dist/styles.css"
   },
   "scripts": {
     "build": "pnpm run build:tsup && pnpm run build:css",

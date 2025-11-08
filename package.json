@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "build": "turbo run build",
-    "dev": "turbo run dev",
+    "dev": "turbo run dev --parallel",
     "test": "turbo run test",
     "lint": "turbo run lint",
     "format": "prettier --write \"**/*.{ts,tsx,md}\"",
@@ -12,7 +12,14 @@
     "version-packages": "changeset version",
     "release": "changeset publish",
     "ci:version": "changeset version && npm run build",
-    "ci:release": "changeset publish"
+    "ci:release": "changeset publish",
+    "storybook": "turbo run storybook:dev --filter=storybook",
+    "storybook:build": "turbo run storybook:build --filter=storybook",
+    "migrate": "node scripts/migrate.js",
+    "migrate:list": "node scripts/migrate.js list",
+    "migrate:dry-run": "node scripts/migrate.js run v1-to-v2 --dry-run",
+    "migrate:run": "node scripts/migrate.js run v1-to-v2",
+    "test:migrations": "jest scripts/migrations/__tests__"
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.1",
